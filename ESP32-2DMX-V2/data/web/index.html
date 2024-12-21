@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 Art-Net Node</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ESP32 Art-Net Node</h1>
+            <div class="status-bar">
+                <span id="connection-status" class="status-indicator">
+                    <i class="fas fa-wifi"></i>
+                </span>
+                <span id="uptime"></span>
+            </div>
+        </header>
+
+        <nav>
+            <ul class="tab-nav">
+                <li class="active" data-tab="status">状态</li>
+                <li data-tab="network">网络</li>
+                <li data-tab="artnet">Art-Net</li>
+                <li data-tab="pixel">像素</li>
+                <li data-tab="system">系统</li>
+                <li data-tab="ap">AP模式</li> <!-- 添加AP模式选项卡 -->
+            </ul>
+        </nav>
+
+        <main>
+            <!-- 状态页面 -->
+            <div class="tab-content active" id="status">
+                <div class="status-grid">
+                    <div class="status-item">
+                        <h3>网络状态</h3>
+                        <p>IP地址: <span id="ip-address">--</span></p>
+                        <p>信号强度: <span id="wifi-strength">--</span></p>
+                    </div>
+                    <div class="status-item">
+                        <h3>Art-Net状态</h3>
+                        <p>当前宇宙: <span id="current-universe">--</span></p>
+                        <p>最后数据包: <span id="last-packet">--</span></p>
+                    </div>
+                    <div class="status-item">
+                        <h3>DMX状态</h3>
+                        <p>输出模式: <span id="output-mode">--</span></p>
+                        <p>数据速率: <span id="data-rate">--</span></p>
+                    </div>
+                    <div class="status-item">
+                        <h3>系统状态</h3>
+                        <p>运行时间: <span id="system-uptime">--</span></p>
+                        <p>内存使用: <span id="memory-usage">--</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AP模式配置 -->
+            <div class="tab-content" id="ap">
+                <form id="ap-form" class="config-form">
+                    <div class="form-group">
+                        <label for="ap-ssid">SSID</label>
+                        <input type="text" id="ap-ssid" name="apSSID">
+                    </div>
+                    <div class="form-group">
+                        <label for="ap-password">密码</label>
+                        <input type="password" id="ap-password" name="apPassword">
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="no-wifi-mode" name="noWiFiMode">
+                            无WiFi工作模式
+                        </label>
+                    </div>
+                    <button type="submit" class="btn primary">保存设置</button>
+                </form>
+            </div>
+
+            <!-- 网络配置 -->
+            <div class="tab-content" id="network">
+                <form id="network-form" class="config-form">
+                    <div class="form-group">
+                        <label for="device-name">设备名称</label>
+                        <input type="text" id="device-name" name="deviceName">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="dhcp-enabled" name="dhcpEnabled">
+                            启用DHCP
+                        </label>
+                    </div>
+
+                    <div id="static-ip-settings">
+                        <div class="form-group">
+                            <label for="static-ip">静态IP地址</label>
+                            <input type="text" id="static-ip" name="staticIP">
+                        </div>
+                        <div class="form-group">
+                            <label for="subnet-mask">子网掩码</label>
+                            <input type="text" id="subnet-mask" name="staticMask">
+                        </div>
+                        <div class="form-group">
+                            <label for="gateway">网关</label>
+                            <input type="text" id="gateway" name="staticGateway">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn primary">保存设置</button>
+                </form>
+            </div>
+
+            <!-- Art-Net配置 -->
+            <div class="tab-content" id="artnet">
+                <form id="artnet-form" class="config-form">
+                    <div class="form-group">
+                        <label for="artnet-net">网络</label>
+                        <input type="number" id="artnet-net" name="artnetNet" min="0" max="127">
+                    </div>
+                    <div class="form-group">
+                        <label for="artnet-subnet">子网</label>
+                        <input type="number" id="artnet-subnet" name="artnetSubnet" min="0" max="15">
+                    </div>
+                    <div class="form-group">
+                        <label for="artnet-universe">宇宙</label>
+                        <input type="number" id="artnet-universe" name="artnetUniverse" min="0" max="15">
+                    </div>
+                    <div class="form-group">
+                        <label for="dmx-start">DMX起始地址</label>
+                        <input type="number" id="dmx-start" name="dmxStartAddress" min="1" max="512">
+                    </div>
+
+                    <button type="submit" class="btn primary">保存设置</button>
+                </form>
+            </div>
+
+            <!-- 像素配置 -->
+            <div class="tab-content" id="pixel">
+                <form id="pixel-form" class="config-form">
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="pixel-enabled" name="pixelEnabled">
+                            启用像素输出
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="pixel-count">像素数量</label>
+                        <input type="number" id="pixel-count" name="pixelCount" min="1" max="1360">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="pixel-type">像素类型</label>
+                        <select id="pixel-type" name="pixelType">
+                            <option value="0">WS2812</option>
+                            <option value="1">SK6812</option>
+                            <option value="2">APA102</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pixel-test">测试模式</label>
+                        <select id="pixel-test">
+                            <option value="0">关闭</option>
+                            <option value="1">彩虹</option>
+                            <option value="2">追逐</option>
+                            <option value="3">渐变</option>
+                            <option value="4">闪烁</option>
+                            <option value="5">火焰</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn primary">保存设置</button>
+                </form>
+            </div>
+
+            <!-- 系统设置 -->
+            <div class="tab-content" id="system">
+                <div class="system-controls">
+                    <div class="control-group">
+                        <h3>系统控制</h3>
+                        <button id="reboot-btn" class="btn warning">
+                            <i class="fas fa-sync"></i> 重启设备
+                        </button>
+                        <button id="factory-reset-btn" class="btn danger">
+                            <i class="fas fa-trash"></i> 恢复出厂设置
+                        </button>
+                    </div>
+                    
+                    <div class="control-group">
+                        <h3>系统信息</h3>
+                        <p>固件版本: <span id="firmware-version">1.0.0</span></p>
+                        <p>MAC地址: <span id="mac-address">--</span></p>
+                        <p>编译时间: <span id="build-time">--</span></p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    
+    <!-- 弹出消息 -->
+    <div id="toast" class="toast"></div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
